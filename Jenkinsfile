@@ -1,19 +1,25 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPullRequest()
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        stage('Check Python') {
-            steps {
-                sh 'python3 --version'
+
+        stage('Run only on develop PRs') {
+            when {
+                expression {
+                    return env.ghprbTargetBranch == 'develop'
+                }
             }
-        }
-        stage('Run Test') {
             steps {
+                echo "Pull request into develop detected."
                 sh 'python3 test.py'
             }
         }
